@@ -1,0 +1,62 @@
+Technical Assessment: Flutter Mobile App Development
+Project Overview:
+You are required to build a Product Catalog App using Flutter. The app should allow users to browse a list of products, view individual product details, and filter products by category or price. Additionally, the app should provide functionality for users to add, edit, and delete products. There is no need to implement login functionality. The project should be performant, follow clean coding practices, and demonstrate your understanding of key Flutter concepts.
+Assessment Criteria:
+1. Flutter Proficiency
+   * Use of Flutter widgets (stateless and stateful)
+   * Implementation of custom widgets and UI components
+   * Understanding of widget lifecycle and state management
+   * Navigation between screens using Flutter’s Navigator
+2. Product Catalog Functionality
+   * Display a list of products with details like name, price, description, and image
+   * Implement filtering functionality to allow users to filter products by category or price range
+   * Provide a detailed view for each product that includes additional information (e.g., full description, images)
+3. Product Management Functionality
+   * Allow users to add new products with fields such as name, description, price, category, and image
+   * Implement functionality for users to edit existing products
+   * Allow users to delete products, with a confirmation prompt
+   * Ensure that changes (add, edit, delete) are reflected immediately in the product list
+4. State Management
+   * Implement state management using an appropriate solution (e.g., Provider, Riverpod, Bloc, GetX or any of your choice)
+   * Efficiently manage the app’s state and data flow
+   * Handle state changes and UI updates seamlessly
+5. Database Integration
+   * Integrate a local database solution (e.g., SQLite, Hive) or use Firebase Firestore
+   * Persist product data locally or remotely and retrieve it efficiently
+   * Handle offline data access and synchronization (if applicable)
+6. UI/UX Design
+   * No UI/UX design is provided, so design to your taste and choice but make it look simple and appealing.
+   * Design a user-friendly and visually appealing interface
+   * Ensure the app is responsive and works well on different screen sizes
+   * Use Flutter’s animation capabilities to enhance user experience (e.g., transitions, loading indicators)
+7. Performance Optimization
+   * Optimize the app’s performance (e.g., reducing unnecessary widget rebuilds)
+   * Use Flutter’s profiling tools to identify and address performance bottlenecks
+   * Efficiently handle large lists or data sets
+8. Code Quality and Best Practices
+   * Write clean, readable, and maintainable code
+   * Adhere to SOLID principles and other best practices
+   * Properly organize files and folders according to feature or functionality
+   * Write unit and/or widget tests for critical parts of the app
+Deliverables:
+1. A GitHub repository containing the codebase.
+2. A README.md file that includes:
+   * An overview of the project.
+   * Instructions for setting up and running the app locally.
+   * Any notes on design decisions, optimizations, and trade-offs.
+   * A brief explanation of the state management solution used.
+3. An APK or IPA file (if possible) for easy testing on a physical device or emulator.
+Submission Instructions:
+* The candidate has 7 days to complete and submit the assessment.
+* Submission Deadline: September 4, 2024.
+* Pls submit your work using this url  https://forms.gle/uL484GwN2tne9JNg9 
+Evaluation Criteria:
+* Functionality: Does the app meet the project requirements?
+* Code Quality: Is the code clean, well-organized, and maintainable?
+* Performance: Is the app performant and optimized?
+* UI/UX Design: Is the app user-friendly and visually appealing?
+* State Management: Is the state managed efficiently and correctly?
+* Database Integration: Is data persisted correctly and handled efficiently?
+* Documentation: Is the README.md file clear and comprehensive?
+Interview Follow-Up:
+* After reviewing the submission, the candidate will be invited to discuss their approach, challenges faced, and decisions made during the implementation. This may include a code walkthrough and/or pairing on a small feature or bug fix.
