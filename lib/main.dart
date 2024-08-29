@@ -7,7 +7,9 @@ import 'package:product_catalog/layout/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print('Starting the application');
   await initDependencies();
+  print('Dependencies initialized');
   runApp(const MyApp());
 }
 

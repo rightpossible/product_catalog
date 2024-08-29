@@ -14,54 +14,50 @@ class LoadingProductListCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 150,
-              color: Colors.white,
-            ),
+            _buildImagePlaceholder(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 12,
-                    color: Colors.white,
-                  ),
+                  _buildTextPlaceholder(width: 100, height: 12),
                   const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    height: 16,
-                    color: Colors.white,
-                  ),
+                  _buildTextPlaceholder(width: double.infinity, height: 16),
                   const SizedBox(height: 4),
-                  Container(
-                    width: 200,
-                    height: 16,
-                    color: Colors.white,
-                  ),
+                  _buildTextPlaceholder(width: 200, height: 16),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 12,
-                        color: Colors.white,
-                      ),
-                      Container(
-                        width: 60,
-                        height: 16,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
+                  _buildPriceAndRatingPlaceholder(),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      height: 150,
+      color: Colors.white,
+    );
+  }
+
+  Widget _buildTextPlaceholder({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.white,
+    );
+  }
+
+  Widget _buildPriceAndRatingPlaceholder() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildTextPlaceholder(width: 80, height: 12),
+        _buildTextPlaceholder(width: 60, height: 16),
+      ],
     );
   }
 }

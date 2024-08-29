@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
 import 'package:product_catalog/features/product/presentation/pages/products_page.dart';
 import 'package:product_catalog/features/product/presentation/pages/add_Edit_product_page.dart';
-import 'package:product_catalog/features/product/presentation/widgets/loading_product_list_card.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_loading_widget.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_page_widget.dart';
 
@@ -15,19 +16,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late PageController _pageController;
+  int _selectedIndex = 0;
+
   @override
   void initState() {
-    context.read<ProductBloc>().add(GetAllProductsEvent());
     super.initState();
+    _pageController = PageController();
+    context.read<ProductBloc>().add(GetAllProductsEvent());
   }
 
-  int _selectedIndex = 0;
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _buildBody(),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() => _selectedIndex = index);
+        },
+        children: [
+          _buildProductsPage(),
+          const AddEditProductPage(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -47,36 +63,60 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBody() {
-    return BlocBuilder<ProductBloc, ProductState>(
-      builder: (context, state) {
-        if (state is GetAllProductsSuccess) {
-          return _selectedIndex == 0
-              ? ProductsPage(
-                  child: ProductPageWidgets(productsStream: state.products),
-                )
-              : const AddEditProductPage();
-        } else if (state is FilteringProductsSuccess) {
-          return ProductsPage(
-            child: ProductPageWidgets(productsStream: state.products),
+  Widget _buildProductsPage() {
+    return RefreshIndicator(
+      onRefresh: () async {
+        try {
+          final completer = Completer<void>();
+          context.read<ProductBloc>().add(GetAllProductsEvent());
+
+          // Listen for the state change
+          final subscription =
+              context.read<ProductBloc>().stream.listen((state) {
+            if (state is GetAllProductsSuccess || state is ErrorState) {
+              if (!completer.isCompleted) completer.complete();
+            }
+          });
+
+          // Wait for the operation to complete or timeout after 10 seconds
+          await completer.future.timeout(const Duration(seconds: 10));
+          await subscription.cancel();
+        } catch (e) {
+          // Handle timeout or any other errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Refresh failed: $e')),
           );
-        } else if (state is ErrorState) {
-          return Center(child: Text('Error: ${state.error}'));
         }
-        // Show loading state
-        return const ProductsPage(
-          child: ProductLoadingWidget(),
-        );
       },
+      child: BlocBuilder<ProductBloc, ProductState>(
+        builder: (context, state) {
+          if (state is GetAllProductsSuccess) {
+            return ProductsPage(
+              child: ProductPageWidgets(productsStream: state.products),
+            );
+          } else if (state is FilteringProductsSuccess) {
+            return ProductsPage(
+              child: ProductPageWidgets(productsStream: state.products),
+            );
+          } else if (state is ErrorState) {
+            return Center(child: Text('Error: ${state.error}'));
+          }
+          return const ProductsPage(
+            child: ProductLoadingWidget(),
+          );
+        },
+      ),
     );
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (index == 0) {
-        context.read<ProductBloc>().add(GetAllProductsEvent());
-      }
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     });
   }
 }

@@ -12,6 +12,11 @@ import 'package:product_catalog/features/product/domain/usecases/update_product.
 part 'product_event.dart';
 part 'product_state.dart';
 
+/// Manages the state of products in the application.
+///
+/// This bloc handles various product-related operations such as
+/// fetching all products, adding a new product, updating an existing product,
+/// deleting a product, and applying filters to the product list.
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final GetAllProducts getAllProducts;
   final AddProduct addProduct;
@@ -19,6 +24,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final DeleteProduct deleteProduct;
   final FilterProducts filterProducts;
 
+  /// Creates a new instance of [ProductBloc].
+  ///
+  /// Requires instances of use cases for product operations.
   ProductBloc({
     required this.getAllProducts,
     required this.addProduct,
@@ -33,6 +41,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ApplyFiltersEvent>(_onApplyFilters);
   }
 
+  /// Handles the [GetAllProductsEvent] to fetch all products.
+  ///
+  /// Emits [GettingAllProducts] state while fetching and either
+  /// [GetAllProductsSuccess] or [ErrorState] based on the result.
   Future<void> _onGetAllProducts(
       GetAllProductsEvent event, Emitter<ProductState> emit) async {
     emit(GettingAllProducts());
@@ -45,6 +57,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
+  /// Handles the [AddProductEvent] to add a new product.
+  ///
+  /// Emits [AddingProduct] state while adding and either
+  /// [AddingProductSuccess] or [ErrorState] based on the result.
   Future<void> _onAddProduct(
       AddProductEvent event, Emitter<ProductState> emit) async {
     emit(AddingProduct());
@@ -58,6 +74,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
+  /// Handles the [UpdateProductEvent] to update an existing product.
+  ///
+  /// Emits [UpdatingProduct] state while updating and either
+  /// [UpdatingProductSuccess] or [ErrorState] based on the result.
+  /// After updating, it triggers a fetch of all products.
   Future<void> _onUpdateProduct(
       UpdateProductEvent event, Emitter<ProductState> emit) async {
     emit(UpdatingProduct());
@@ -69,6 +90,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     add(GetAllProductsEvent());
   }
 
+  /// Handles the [DeleteProductEvent] to delete a product.
+  ///
+  /// Emits [DeletingProduct] state while deleting and either
+  /// [DeleteProductSuccess] or [ErrorState] based on the result.
   Future<void> _onDeleteProduct(
       DeleteProductEvent event, Emitter<ProductState> emit) async {
     print('Bloc: Deleting product ${event.product.id}');
@@ -89,6 +114,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
+  /// Handles the [ApplyFiltersEvent] to filter products.
+  ///
+  /// Emits [FilteringProducts] state while filtering and either
+  /// [FilteringProductsSuccess] or [ErrorState] based on the result.
   Future<void> _onApplyFilters(
       ApplyFiltersEvent event, Emitter<ProductState> emit) async {
     emit(FilteringProducts());

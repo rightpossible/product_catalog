@@ -1,47 +1,15 @@
-import 'package:hive/hive.dart';
 import 'package:product_catalog/core/constant/database_string.dart';
 import 'package:product_catalog/features/product/domain/entities/product.dart';
 
-part 'product_model.g.dart';
-
-@HiveType(typeId: 0)
-class ProductModel extends HiveObject implements Product {
-  @HiveField(0)
-  @override
-  final String id;
-
-  @HiveField(1)
-  @override
-  final String name;
-
-  @HiveField(2)
-  @override
-  final String description;
-
-  @HiveField(3)
-  @override
-  final double price;
-
-  @HiveField(4)
-  @override
-  final String category;
-
-  @HiveField(5)
-  @override
-  final String imageUrl;
-
-  @HiveField(6)
-  @override
-  final String? localImageUrl;
-
+class ProductModel extends Product {
   ProductModel({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.category,
-    required this.imageUrl,
-    this.localImageUrl,
+    required super.id,
+    required super.name,
+    required super.description,
+    required super.price,
+    required super.category,
+    required super.imageUrl,
+    super.localImageUrl,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {

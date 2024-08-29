@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_catalog/features/product/domain/entities/product.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
+import 'package:product_catalog/features/product/presentation/pages/product_details_page.dart';
 
 class ProductSearchDelegate extends SearchDelegate<Product?> {
   final ProductBloc productBloc;
@@ -72,6 +73,12 @@ class ProductSearchDelegate extends SearchDelegate<Product?> {
                           width: 50, height: 50),
                       onTap: () {
                         close(context, product);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductDetailsPage(product: product),
+                          ),
+                        );
                       },
                     );
                   },

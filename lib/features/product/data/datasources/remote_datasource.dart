@@ -6,8 +6,8 @@ import 'package:product_catalog/core/errors/exception.dart';
 import 'package:product_catalog/features/product/data/models/product_model.dart';
 import 'package:product_catalog/core/constant/database_string.dart';
 import 'package:mime/mime.dart';
-import 'package:path/path.dart' as path;
 
+/// Abstract class defining the contract for product remote data operations.
 abstract class ProductRemoteDataSource {
   Stream<List<ProductModel>> getAllProducts();
   Future<ProductModel> getProductById(String id);
@@ -22,12 +22,18 @@ abstract class ProductRemoteDataSource {
       String? category, double minPrice, double maxPrice);
 }
 
+/// Implementation of [ProductRemoteDataSource] using Firebase services.
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
 
+  /// Constructs a [ProductRemoteDataSourceImpl] with the given Firestore and Storage instances.
   ProductRemoteDataSourceImpl(this._firestore, this._storage);
 
+  /// Retrieves a stream of all products from Firestore.
+  ///
+  /// Returns a [Stream] of [List<ProductModel>].
+  /// Throws a [ServerException] if there's an error.
   @override
   Stream<List<ProductModel>> getAllProducts() {
     try {
@@ -42,6 +48,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Adds a new product to Firestore.
+  ///
+  /// Takes a [ProductModel] as input and returns the updated [ProductModel] with a new ID.
+  /// Throws a [ServerException] if there's an error during the operation.
   @override
   Future<ProductModel> addProduct(ProductModel product) async {
     try {
@@ -62,6 +72,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Deletes a product from Firestore by its ID.
+  ///
+  /// Returns [true] if the product was successfully deleted, [false] otherwise.
+  /// Throws an [Exception] if there's an error during the operation.
   @override
   Future<bool> deleteProduct(String id) async {
     try {
@@ -106,6 +120,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Retrieves a product from Firestore by its ID.
+  ///
+  /// Returns a [ProductModel] if found.
+  /// Throws an [Exception] if there's an error or the product is not found.
   @override
   Future<ProductModel> getProductById(String id) async {
     try {
@@ -119,6 +137,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Updates an existing product in Firestore.
+  ///
+  /// Takes a [ProductModel] as input and returns the updated [ProductModel].
+  /// Throws an [Exception] if there's an error or the product is not found.
   @override
   Future<ProductModel> updateProduct(ProductModel product) async {
     try {
@@ -166,6 +188,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Uploads an image to Firebase Storage.
+  ///
+  /// Takes a local image URL and returns the download URL of the uploaded image.
+  /// Throws an [Exception] if there's an error during the upload process.
   @override
   Future<String> uploadImage(String localImageUrl) async {
     try {
@@ -214,6 +240,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Deletes an image from Firebase Storage.
+  ///
+  /// Takes the image URL to be deleted.
+  /// Throws an [Exception] if there's an error during the deletion process.
   @override
   Future<void> deleteImage(String imageUrl) async {
     try {
@@ -224,6 +254,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Filters products by category.
+  ///
+  /// Returns a [List<ProductModel>] of products matching the given category.
+  /// Throws an [Exception] if there's an error during the operation.
   @override
   Future<List<ProductModel>> filterProductsByCategory(String category) async {
     try {
@@ -239,6 +273,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Filters products by price range.
+  ///
+  /// Returns a [List<ProductModel>] of products within the given price range.
+  /// Throws an [Exception] if there's an error during the operation.
   @override
   Future<List<ProductModel>> filterProductsByPriceRange(
       double min, double max) async {
@@ -256,6 +294,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     }
   }
 
+  /// Filters products by category and price range.
+  ///
+  /// Returns a [Stream] of [List<ProductModel>] matching the given criteria.
+  /// Throws a [ServerException] if there's an error during the operation.
   @override
   Stream<List<ProductModel>> filterProducts(
       String? category, double minPrice, double maxPrice) {

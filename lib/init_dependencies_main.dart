@@ -4,19 +4,19 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   //core
-  // final appDocumentDir = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter();
-  serviceLocator.registerLazySingleton<ProductModelAdapter>(
-    () {
-      Hive.registerAdapter(ProductModelAdapter());
-      return ProductModelAdapter();
-    },
-  );
+
   serviceLocator.registerFactory(() => InternetConnection());
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final AppDatabase database = AppDatabase();
+    await databaseFactory.setDatabasesPath(await getDatabasesPath());
+
+   await DefaultCacheManager().emptyCache();
+
+  serviceLocator.registerLazySingleton(() => database);
+
   serviceLocator.registerLazySingleton(() => FirebaseFirestore.instance);
   serviceLocator.registerLazySingleton(() => FirebaseStorage.instance);
 
@@ -29,8 +29,10 @@ Future<void> initDependencies() async {
 
 void _initProductDependencies() {
   //datasource
-  serviceLocator.registerFactory<ProductLocalDataSource>(
-      () => ProductLocalDataSourceImpl(productModelAdapter: serviceLocator()));
+  serviceLocator
+      .registerFactory<ProductLocalDataSource>(() => ProductLocalDataSourceImpl(
+            database: serviceLocator(),
+          ));
   serviceLocator.registerFactory<ProductRemoteDataSource>(
       () => ProductRemoteDataSourceImpl(serviceLocator(), serviceLocator()));
 

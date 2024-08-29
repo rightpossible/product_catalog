@@ -15,7 +15,7 @@ class ProductsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: const Text('Product CataLog'),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

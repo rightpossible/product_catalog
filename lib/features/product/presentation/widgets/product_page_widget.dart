@@ -19,119 +19,70 @@ class ProductPageWidgets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductBloc, ProductState>(
-      listener: (context, state) {
-        if (state is ErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error)),
-          );
-        }
-      },
+      listener: _handleErrorState,
       builder: (context, state) {
         return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Best Sale Product',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  TextButton.icon(
-                    onPressed: () => _showFilterBottomSheet(context),
-                    icon: const Icon(Icons.filter_list),
-                    label: Text('Filter',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                ],
-              ),
-            ),
+            _buildHeader(context),
             Expanded(
-              child: StreamBuilder<List<Product>>(
-                stream: state is FilteringProductsSuccess
-                    ? state.products
-                    : productsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final products = snapshot.data ?? [];
-
-                  if (products.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.search_off,
-                              size: 64, color: Colors.grey),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No products found',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Try adjusting your filters or Add new product',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return AnimationLimiter(
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.7,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return AnimationConfiguration.staggeredGrid(
-                          position: index,
-                          duration: const Duration(milliseconds: 375),
-                          columnCount: 2,
-                          child: ScaleAnimation(
-                            child: FadeInAnimation(
-                              child: GestureDetector(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (context, animation,
-                                            secondaryAnimation) =>
-                                        ProductDetailsPage(
-                                            product: products[index]),
-                                    transitionsBuilder: (context, animation,
-                                        secondaryAnimation, child) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: child,
-                                      );
-                                    },
-                                  ),
-                                ),
-                                child:
-                                    ProductListCard(product: products[index]),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+              child: _buildProductList(context, state),
             ),
           ],
         );
+      },
+    );
+  }
+
+  void _handleErrorState(BuildContext context, ProductState state) {
+    if (state is ErrorState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.error)),
+      );
+    }
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Best Sale Product',
+              style: Theme.of(context).textTheme.titleLarge),
+          _buildFilterButton(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => _showFilterBottomSheet(context),
+      icon: const Icon(Icons.filter_list),
+      label: Text('Filter', style: Theme.of(context).textTheme.titleMedium),
+    );
+  }
+
+  Widget _buildProductList(BuildContext context, ProductState state) {
+    return StreamBuilder<List<Product>>(
+      stream:
+          state is FilteringProductsSuccess ? state.products : productsStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final products = snapshot.data ?? [];
+
+        if (products.isEmpty) {
+          return _buildEmptyProductList(context);
+        }
+
+        return _buildProductGrid(products);
       },
     );
   }
@@ -159,6 +110,93 @@ class ProductPageWidgets extends StatelessWidget {
       },
     );
   }
+
+  Widget _buildEmptyProductList(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.search_off, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            'No products found',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try Adding new product',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductGrid(List<Product> products) {
+    return AnimationLimiter(
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.5, // Adjusted for more vertical space
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) =>
+            _buildProductItem(context, products[index], index),
+      ),
+    );
+  }
+
+  Widget _buildProductItem(BuildContext context, Product product, int index) {
+    return AnimationConfiguration.staggeredGrid(
+      position: index,
+      duration: const Duration(milliseconds: 375),
+      columnCount: 2,
+      child: ScaleAnimation(
+        child: FadeInAnimation(
+          child: GestureDetector(
+            onTap: () => _navigateToProductDetails(context, product),
+            child: Container(
+              decoration: _buildProductItemDecoration(context),
+              child: ProductListCard(product: product),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToProductDetails(BuildContext context, Product product) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ProductDetailsPage(product: product),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  BoxDecoration _buildProductItemDecoration(BuildContext context) {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      color: Theme.of(context).colorScheme.surface,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 10,
+          offset: const Offset(0, 5),
+        ),
+      ],
+    );
+  }
 }
 
 class FilterBottomSheet extends StatefulWidget {
@@ -167,10 +205,10 @@ class FilterBottomSheet extends StatefulWidget {
   const FilterBottomSheet({super.key, required this.onApplyFilters});
 
   @override
-  _FilterBottomSheetState createState() => _FilterBottomSheetState();
+  FilterBottomSheetState createState() => FilterBottomSheetState();
 }
 
-class _FilterBottomSheetState extends State<FilterBottomSheet>
+class FilterBottomSheetState extends State<FilterBottomSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

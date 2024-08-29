@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:product_catalog/features/product/domain/entities/product.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
 import 'package:product_catalog/features/product/presentation/pages/product_details_page.dart';
-import 'package:product_catalog/layout/home_page.dart';
 import 'package:uuid/uuid.dart';
 import 'package:product_catalog/features/product/domain/entities/categories.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -83,15 +82,6 @@ class _AddEditProductPageState extends State<AddEditProductPage>
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Product' : 'Add New Product',
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomePage()),
-              (route) => false,
-            ),
-          ),
-        ],
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
@@ -181,12 +171,12 @@ class _AddEditProductPageState extends State<AddEditProductPage>
                             BlocConsumer<ProductBloc, ProductState>(
                               listener: (context, state) {
                                 if (state is AddingProductSuccess) {
-                                  Navigator.of(context).push(
+                                  Navigator.of(context).pushReplacement(
                                       ProductDetailsPage.route(state.product));
                                 }
 
                                 if (state is UpdatingProductSuccess) {
-                                  Navigator.of(context).push(
+                                  Navigator.of(context).pushReplacement(
                                       ProductDetailsPage.route(state.product));
                                 }
                                 if (state is ErrorState) {
@@ -323,7 +313,7 @@ class _AddEditProductPageState extends State<AddEditProductPage>
         price: double.parse(_priceController.text),
         category: _selectedCategory.toString().split('.').last,
         imageUrl: widget.productToEdit?.imageUrl ?? '',
-        localImageUrl: '',
+        localImageUrl: _imageFile!.path ,
       );
 
       if (_isEditing) {

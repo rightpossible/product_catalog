@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:product_catalog/features/product/domain/entities/product.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
+import 'package:product_catalog/features/product/presentation/widgets/product_image.dart';
 import 'package:product_catalog/layout/home_page.dart';
 import 'package:product_catalog/features/product/presentation/pages/add_edit_product_page.dart';
 
@@ -192,14 +193,17 @@ class ProductDetailsPage extends StatelessWidget {
             ),
           ],
         ),
-        child: product.imageUrl.isNotEmpty
-            ? Image.network(
-                product.imageUrl,
-                fit: BoxFit.contain, // Use contain instead of cover
-              )
-            : const Center(
-                child: Icon(Icons.image, size: 100, color: Colors.grey),
-              ),
+        child: Container(
+          constraints: const BoxConstraints(
+            maxHeight: 500,
+            maxWidth: double.infinity,
+          ),
+          height: 200,
+          child: ProductImage(
+            imageUrl: product.imageUrl,
+            localImagePath: product.localImageUrl,
+          ),
+        ),
       ),
     );
   }
