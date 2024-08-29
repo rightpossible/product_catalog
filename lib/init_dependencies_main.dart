@@ -4,13 +4,22 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   //core
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  Hive.init(appDocumentDir.path);
-
-  serviceLocator.registerLazySingleton(
-    () => Hive.box(DatabaseString.productBox),
+  // final appDocumentDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter();
+  serviceLocator.registerLazySingleton<ProductModelAdapter>(
+    () {
+      Hive.registerAdapter(ProductModelAdapter());
+      return ProductModelAdapter();
+    },
   );
-  serviceLocator.registerLazySingleton<HiveInterface>(() => Hive);
+  serviceLocator.registerFactory(() => InternetConnection());
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  serviceLocator.registerLazySingleton(() => FirebaseFirestore.instance);
+  serviceLocator.registerLazySingleton(() => FirebaseStorage.instance);
+
   serviceLocator.registerLazySingleton<ConnectionChecker>(
       () => ConnectionCheckerImpl(internetConnection: serviceLocator()));
 
@@ -20,12 +29,14 @@ Future<void> initDependencies() async {
 
 void _initProductDependencies() {
   //datasource
-  serviceLocator.registerLazySingleton<ProductLocalDataSource>(
-      () => ProductLocalDataSourceImpl(box: serviceLocator()));
+  serviceLocator.registerFactory<ProductLocalDataSource>(
+      () => ProductLocalDataSourceImpl(productModelAdapter: serviceLocator()));
+  serviceLocator.registerFactory<ProductRemoteDataSource>(
+      () => ProductRemoteDataSourceImpl(serviceLocator(), serviceLocator()));
 
   //repository
-  serviceLocator.registerLazySingleton<ProductRepository>(
-      () => ProductRepositoryImpl(serviceLocator(), serviceLocator()));
+  serviceLocator.registerFactory<ProductRepository>(() => ProductRepositoryImpl(
+      serviceLocator(), serviceLocator(), serviceLocator()));
 
 //usecase
   serviceLocator
@@ -39,6 +50,15 @@ void _initProductDependencies() {
   serviceLocator
       .registerFactory<DeleteProduct>(() => DeleteProduct(serviceLocator()));
 
+  // bloc
 
-      // bloc
+  serviceLocator.registerFactory<ProductBloc>(
+    () => ProductBloc(
+      getAllProducts: serviceLocator(),
+      addProduct: serviceLocator(),
+      updateProduct: serviceLocator(),
+      deleteProduct: serviceLocator(),
+      filterProducts: serviceLocator(),
+    ),
+  );
 }

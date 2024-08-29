@@ -11,13 +11,15 @@ abstract class ProductLocalDataSource {
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
-  final Box box;
-  ProductLocalDataSourceImpl({required this.box});
+  final ProductModelAdapter productModelAdapter;
+  ProductLocalDataSourceImpl({required this.productModelAdapter});
 
   @override
   Future<List<ProductModel>> getProducts() async {
     try {
-      return box.get(DatabaseString.productTable) as List<ProductModel>;
+      throw Exception('test');
+      // final products = productModelAdapter.read();
+      // return products;
     } catch (e) {
       print(e);
       throw Exception(e);
@@ -29,7 +31,7 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
     try {
       final products = await getProducts();
       products.add(product);
-      await box.put(DatabaseString.productTable, products);
+      // await box.put(DatabaseString.productCollectionName, products);
     } catch (e) {
       print(e);
       throw Exception(e);
@@ -41,7 +43,7 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
     try {
       final products = await getProducts();
       products.removeWhere((product) => product.id == id);
-      await box.put(DatabaseString.productTable, products);
+      // await box.put(DatabaseString.productCollectionName, products);
     } catch (e) {
       print(e);
       throw Exception(e);
@@ -66,7 +68,7 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
       final index = products.indexWhere((product) => product.id == product.id);
       if (index != -1) {
         products[index] = product;
-        await box.put(DatabaseString.productTable, products);
+        // await box.put(DatabaseString.productCollectionName, products);
       }
     } catch (e) {
       print(e);

@@ -18,7 +18,7 @@ Assessment Criteria:
    * Ensure that changes (add, edit, delete) are reflected immediately in the product list
 4. State Management
    * Implement state management using an appropriate solution (e.g., Provider, Riverpod, Bloc, GetX or any of your choice)
-   * Efficiently manage the app’s state and data flow
+   * Efficiently manage the app’s state and data flow          
    * Handle state changes and UI updates seamlessly
 5. Database Integration
    * Integrate a local database solution (e.g., SQLite, Hive) or use Firebase Firestore

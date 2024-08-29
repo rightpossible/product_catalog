@@ -30,6 +30,10 @@ class ProductModel extends HiveObject implements Product {
   @override
   final String imageUrl;
 
+  @HiveField(6)
+  @override
+  final String? localImageUrl;
+
   ProductModel({
     required this.id,
     required this.name,
@@ -37,6 +41,7 @@ class ProductModel extends HiveObject implements Product {
     required this.price,
     required this.category,
     required this.imageUrl,
+    this.localImageUrl,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +52,7 @@ class ProductModel extends HiveObject implements Product {
       price: json[DatabaseString.price],
       category: json[DatabaseString.category],
       imageUrl: json[DatabaseString.imageUrl],
+      localImageUrl: json[DatabaseString.localImageUrl],
     );
   }
 
@@ -58,6 +64,7 @@ class ProductModel extends HiveObject implements Product {
       DatabaseString.price: price,
       DatabaseString.category: category,
       DatabaseString.imageUrl: imageUrl,
+      DatabaseString.localImageUrl: localImageUrl,
     };
   }
 
@@ -69,6 +76,7 @@ class ProductModel extends HiveObject implements Product {
       price: price,
       category: category,
       imageUrl: imageUrl,
+      localImageUrl: localImageUrl,
     );
   }
 
@@ -80,11 +88,32 @@ class ProductModel extends HiveObject implements Product {
       price: product.price,
       category: product.category,
       imageUrl: product.imageUrl,
+      localImageUrl: product.localImageUrl,
     );
   }
 
   @override
   String toString() {
-    return 'ProductModel(id: $id, name: $name, description: $description, price: $price, category: $category, imageUrl: $imageUrl)';
+    return 'ProductModel(id: $id, name: $name, description: $description, price: $price, category: $category, imageUrl: $imageUrl, localImageUrl: $localImageUrl)';
+  }
+
+  ProductModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    double? price,
+    String? category,
+    String? imageUrl,
+    String? localImageUrl,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      category: category ?? this.category,
+      imageUrl: imageUrl ?? this.imageUrl,
+      localImageUrl: localImageUrl ?? this.localImageUrl,
+    );
   }
 }
