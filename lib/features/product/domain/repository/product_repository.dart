@@ -9,10 +9,12 @@ abstract class ProductRepository {
   Future<Either<Failure, Product>> getProductById(String id);
   Future<Either<Failure, Product>> addProduct(Product product, File imageFile);
   Future<Either<Failure, Product>> updateProduct(Product product);
-  Future<Either<Failure, void>> deleteProduct(String id);
+  Future<Either<Failure, void>> deleteProduct(Product product);
   Future<Either<Failure, List<Product>>> filterProductsByCategory(
       String category);
   Future<Either<Failure, List<Product>>> filterProductsByPriceRange(
       double min, double max);
   Future<Either<Failure, String>> uploadImage(String localImageUrl);
+  Future<Either<Failure, Stream<List<Product>>>> filterProducts(
+      String? category, double minPrice, double maxPrice);
 }

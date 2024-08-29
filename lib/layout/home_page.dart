@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
 import 'package:product_catalog/features/product/presentation/pages/products_page.dart';
-import 'package:product_catalog/features/product/presentation/pages/add_new_product_page.dart';
+import 'package:product_catalog/features/product/presentation/pages/add_Edit_product_page.dart';
 import 'package:product_catalog/features/product/presentation/widgets/loading_product_list_card.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_loading_widget.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_page_widget.dart';
@@ -22,37 +22,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _selectedIndex = 0;
-  static final List<Widget> _widgetOptions = <Widget>[
-    BlocConsumer<ProductBloc, ProductState>(
-      listener: (context, state) {
-        // Handle any side effects if needed
-      },
-      builder: (context, state) {
-        if (state is GetAllProductsSuccess) {
-          return ProductsPage(
-            child: ProductPageWidgets(productsStream: state.products),
-          );
-        }
-        // Show loading state
-        return const ProductsPage(
-          child: ProductLoadingWidget(),
-        );
-      },
-    ),
-    const AddNewProductPage(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: _buildBody(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -70,5 +45,38 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  Widget _buildBody() {
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (context, state) {
+        if (state is GetAllProductsSuccess) {
+          return _selectedIndex == 0
+              ? ProductsPage(
+                  child: ProductPageWidgets(productsStream: state.products),
+                )
+              : const AddEditProductPage();
+        } else if (state is FilteringProductsSuccess) {
+          return ProductsPage(
+            child: ProductPageWidgets(productsStream: state.products),
+          );
+        } else if (state is ErrorState) {
+          return Center(child: Text('Error: ${state.error}'));
+        }
+        // Show loading state
+        return const ProductsPage(
+          child: ProductLoadingWidget(),
+        );
+      },
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      if (index == 0) {
+        context.read<ProductBloc>().add(GetAllProductsEvent());
+      }
+    });
   }
 }

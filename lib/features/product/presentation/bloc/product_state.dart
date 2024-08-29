@@ -16,12 +16,12 @@ class GetAllProductsSuccess extends ProductState {
 }
 
 //adding product
-class AddingProductState extends ProductState {}
+class AddingProduct extends ProductState {}
 
-class AddingProductSuccessState extends ProductState {
+class AddingProductSuccess extends ProductState {
   final Product product;
 
-  AddingProductSuccessState({required this.product});
+  AddingProductSuccess({required this.product});
 }
 
 class ErrorState extends ProductState {
@@ -31,20 +31,26 @@ class ErrorState extends ProductState {
 }
 
 //filter products
-class FilteringProductsState extends ProductState {}
+class FilteringProducts extends ProductState {}
 
-class FilteringProductsSuccessState extends ProductState {
-  final List<Product> products;
+class FilteringProductsSuccess extends ProductState {
+  final Stream<List<Product>> products;
 
-  FilteringProductsSuccessState({required this.products});
+  FilteringProductsSuccess({required this.products});
 }
 
 //update product
-class UpdatingProductState extends ProductState {}
+class UpdatingProduct extends ProductState {}
 
-class UpdatingProductSuccessState extends ProductState {}
+class UpdatingProductSuccess extends ProductState {
+  final Product product;
+
+  UpdatingProductSuccess({required this.product});
+}
 
 //delete product
-class DeletingProductState extends ProductState {}
+class DeletingProduct extends ProductState {}
 
-class DeletingProductSuccessState extends ProductState {}
+class DeleteProductSuccess extends ProductState {}
+
+

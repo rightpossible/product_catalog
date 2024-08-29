@@ -13,35 +13,30 @@ part 'product_event.dart';
 part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  final GetAllProducts _getAllProducts;
-  final AddProduct _addProduct;
-  final UpdateProduct _updateProduct;
-  final DeleteProduct _deleteProduct;
-  final FilterProducts _filterProducts;
+  final GetAllProducts getAllProducts;
+  final AddProduct addProduct;
+  final UpdateProduct updateProduct;
+  final DeleteProduct deleteProduct;
+  final FilterProducts filterProducts;
+
   ProductBloc({
-    required GetAllProducts getAllProducts,
-    required AddProduct addProduct,
-    required UpdateProduct updateProduct,
-    required DeleteProduct deleteProduct,
-    required FilterProducts filterProducts,
-  })  : _getAllProducts = getAllProducts,
-        _addProduct = addProduct,
-        _updateProduct = updateProduct,
-        _deleteProduct = deleteProduct,
-        _filterProducts = filterProducts,
-        super(ProductInitial()) {
-    on<ProductEvent>((event, emit) {});
+    required this.getAllProducts,
+    required this.addProduct,
+    required this.updateProduct,
+    required this.deleteProduct,
+    required this.filterProducts,
+  }) : super(ProductInitial()) {
     on<GetAllProductsEvent>(_onGetAllProducts);
     on<AddProductEvent>(_onAddProduct);
     on<UpdateProductEvent>(_onUpdateProduct);
     on<DeleteProductEvent>(_onDeleteProduct);
-    on<FilterProductsEvent>(_onFilterProducts);
+    on<ApplyFiltersEvent>(_onApplyFilters);
   }
 
   Future<void> _onGetAllProducts(
       GetAllProductsEvent event, Emitter<ProductState> emit) async {
     emit(GettingAllProducts());
-    final result = await _getAllProducts.call(NoParams());
+    final result = await getAllProducts.call(NoParams());
 
     if (emit.isDone) return;
     result.fold(
@@ -52,41 +47,62 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   Future<void> _onAddProduct(
       AddProductEvent event, Emitter<ProductState> emit) async {
-    emit(AddingProductState());
-    final result = await _addProduct.call(
+    emit(AddingProduct());
+    final result = await addProduct.call(
         AddProductParams(product: event.product, imageFile: event.imageFile));
 
     if (emit.isDone) return;
     result.fold(
       (l) => emit(ErrorState(error: l.message)),
-      (r) => emit(AddingProductSuccessState(product: r)),
+      (r) => emit(AddingProductSuccess(product: r)),
     );
   }
 
   Future<void> _onUpdateProduct(
       UpdateProductEvent event, Emitter<ProductState> emit) async {
-    emit(UpdatingProductState());
+    emit(UpdatingProduct());
     final result =
-        await _updateProduct.call(UpdateProductParams(product: event.product));
+        await updateProduct.call(UpdateProductParams(product: event.product));
     result.fold((l) => emit(ErrorState(error: l.message)),
-        (r) => emit(UpdatingProductSuccessState()));
+        (r) => emit(UpdatingProductSuccess(product: r)));
+
+    add(GetAllProductsEvent());
   }
 
   Future<void> _onDeleteProduct(
       DeleteProductEvent event, Emitter<ProductState> emit) async {
-    emit(DeletingProductState());
+    print('Bloc: Deleting product ${event.product.id}');
+    emit(DeletingProduct());
     final result =
-        await _deleteProduct.call(DeleteProductParams(id: event.productId));
-    result.fold((l) => emit(ErrorState(error: l.message)),
-        (r) => emit(DeletingProductSuccessState()));
+        await deleteProduct.call(DeleteProductParams(product: event.product));
+    result.fold(
+      (failure) {
+        print('Bloc: Failed to delete product: ${failure.message}');
+        emit(ErrorState(error: failure.message));
+      },
+      (_) {
+        print('Bloc: Product deleted successfully');
+        emit(DeleteProductSuccess());
+        // After emitting DeleteProductSuccess, we should fetch the updated product list
+        // add(GetAllProductsEvent());
+      },
+    );
   }
 
-  Future<void> _onFilterProducts(
-      FilterProductsEvent event, Emitter<ProductState> emit) async {
-    emit(FilteringProductsState());
-    final result = await _filterProducts.call(FilterProductsParams(
-        category: event.category, min: event.min, max: event.max));
-    result.fold((l) => emit(ErrorState(error: l.message)),
-        (r) => emit(FilteringProductsSuccessState(products: r)));
+  Future<void> _onApplyFilters(
+      ApplyFiltersEvent event, Emitter<ProductState> emit) async {
+    emit(FilteringProducts());
+    final result = await filterProducts(FilterProductsParams(
+      category: event.category ?? '',
+      min: event.minPrice,
+      max: event.maxPrice,
+    ));
+    result.fold(
+      (failure) => emit(ErrorState(error: failure.message)),
+      (filteredProducts) {
+        print('Filtered products: $filteredProducts'); // Debug print
+        emit(FilteringProductsSuccess(products: filteredProducts));
+      },
+    );
   }
 }

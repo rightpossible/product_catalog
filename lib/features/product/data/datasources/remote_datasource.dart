@@ -13,11 +13,13 @@ abstract class ProductRemoteDataSource {
   Future<ProductModel> getProductById(String id);
   Future<ProductModel> addProduct(ProductModel product);
   Future<ProductModel> updateProduct(ProductModel product);
-  Future<void> deleteProduct(String id);
+  Future<bool> deleteProduct(String id);
   Future<String> uploadImage(String localImageUrl);
   Future<void> deleteImage(String imageUrl);
   Future<List<ProductModel>> filterProductsByCategory(String category);
   Future<List<ProductModel>> filterProductsByPriceRange(double min, double max);
+  Stream<List<ProductModel>> filterProducts(
+      String? category, double minPrice, double maxPrice);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -50,9 +52,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
       print('Product added successfully. Document reference: ${docRef.id}');
 
-      // product.id = docRef.id;
-      print('Returning product: ${product.toJson()}');
-      return product;
+      // Update the product's ID with the Firestore-generated ID
+      final updatedProduct = product.copyWith(id: docRef.id);
+      print('Returning product: ${updatedProduct.toJson()}');
+      return updatedProduct;
     } catch (e) {
       print('Error adding product: $e');
       throw ServerException(e.toString());
@@ -60,14 +63,46 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   }
 
   @override
-  Future<void> deleteProduct(String id) async {
+  Future<bool> deleteProduct(String id) async {
     try {
-      await _firestore
+      print('RemoteDataSource: Attempting to delete product with id: $id');
+      final querySnapshot = await _firestore
           .collection(DatabaseString.productCollectionName)
-          .doc(id)
-          .delete();
+          .where('id', isEqualTo: id)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        print('RemoteDataSource: Product with id $id does not exist');
+        return false;
+      }
+
+      // There should only be one document with this ID, but we'll delete all matches just in case
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+        print(
+            'RemoteDataSource: Deleted document with Firestore ID: ${doc.id}');
+      }
+
+      // Verify deletion
+      final verifySnapshot = await _firestore
+          .collection(DatabaseString.productCollectionName)
+          .where('id', isEqualTo: id)
+          .get();
+
+      if (verifySnapshot.docs.isEmpty) {
+        print('RemoteDataSource: Product deleted successfully and verified');
+        return true;
+      } else {
+        print('RemoteDataSource: Product deletion failed on verification');
+        return false;
+      }
     } catch (e) {
-      throw Exception(e);
+      print('RemoteDataSource: Error deleting product: $e');
+      if (e is FirebaseException) {
+        print('Firebase error code: ${e.code}');
+        print('Firebase error message: ${e.message}');
+      }
+      throw Exception('Failed to delete product: $e');
     }
   }
 
@@ -87,13 +122,47 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<ProductModel> updateProduct(ProductModel product) async {
     try {
-      await _firestore
+      print(
+          'RemoteDataSource: Attempting to update product with id: ${product.id}');
+      final querySnapshot = await _firestore
           .collection(DatabaseString.productCollectionName)
-          .doc(product.id)
-          .update(product.toJson());
-      return product;
+          .where('id', isEqualTo: product.id)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        print('RemoteDataSource: Product with id ${product.id} does not exist');
+        throw Exception('Product not found');
+      }
+
+      // There should only be one document with this ID, but we'll update all matches just in case
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update(product.toJson());
+        print(
+            'RemoteDataSource: Updated document with Firestore ID: ${doc.id}');
+      }
+
+      // Verify update
+      final verifySnapshot = await _firestore
+          .collection(DatabaseString.productCollectionName)
+          .where('id', isEqualTo: product.id)
+          .get();
+
+      if (verifySnapshot.docs.isNotEmpty) {
+        final updatedProduct =
+            ProductModel.fromJson(verifySnapshot.docs.first.data());
+        print('RemoteDataSource: Product updated successfully and verified');
+        return updatedProduct;
+      } else {
+        print('RemoteDataSource: Product update failed on verification');
+        throw Exception('Failed to update product');
+      }
     } catch (e) {
-      throw Exception(e);
+      print('RemoteDataSource: Error updating product: $e');
+      if (e is FirebaseException) {
+        print('Firebase error code: ${e.code}');
+        print('Firebase error message: ${e.message}');
+      }
+      throw Exception('Failed to update product: $e');
     }
   }
 
@@ -185,5 +254,42 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  @override
+  Stream<List<ProductModel>> filterProducts(
+      String? category, double minPrice, double maxPrice) {
+    print(
+        'Filtering products - Category: $category, Price Range: \$$minPrice - \$$maxPrice');
+
+    Query query = _firestore.collection(DatabaseString.productCollectionName);
+
+    // Apply category filter if provided
+    if (category != null && category.isNotEmpty) {
+      query = query.where('category', isEqualTo: category);
+    }
+
+    // Apply price range filter
+    query = query
+        .where('price', isGreaterThanOrEqualTo: minPrice)
+        .where('price', isLessThanOrEqualTo: maxPrice);
+
+    return query.snapshots().map((querySnapshot) {
+      final filteredProducts = querySnapshot.docs
+          .map((doc) =>
+              ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      print('Filtered products count: ${filteredProducts.length}');
+      return filteredProducts;
+    }).handleError((e) {
+      print('Error filtering products: $e');
+      if (e is FirebaseException) {
+        print('Firebase error code: ${e.code}');
+        print('Firebase error message: ${e.message}');
+      }
+
+      throw ServerException(e.toString());
+    });
   }
 }

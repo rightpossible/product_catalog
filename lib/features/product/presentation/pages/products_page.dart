@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
+import 'package:product_catalog/features/product/presentation/widgets/product_search_delegate.dart';
 
 class ProductsPage extends StatelessWidget {
   final Widget child;
@@ -14,8 +17,17 @@ class ProductsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Products'),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: ProductSearchDelegate(
+                  productBloc: BlocProvider.of<ProductBloc>(context),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: child,

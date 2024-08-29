@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_catalog/core/theme/theme.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
 import 'package:product_catalog/init_dependencies.dart';
-import 'package:product_catalog/layout/home_page.dart';
+import 'package:product_catalog/layout/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +14,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -22,11 +21,12 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => serviceLocator<ProductBloc>()),
       ],
       child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Product Catalog',
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          home: const HomePage()),
+        debugShowCheckedModeBanner: false,
+        title: 'Product Catalog',
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        home: const SplashScreen(),
+      ),
     );
   }
 }

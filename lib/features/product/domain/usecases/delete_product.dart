@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:product_catalog/core/errors/failures.dart';
 import 'package:product_catalog/core/usecase/usecase.dart';
+import 'package:product_catalog/features/product/domain/entities/product.dart';
 import 'package:product_catalog/features/product/domain/repository/product_repository.dart';
 
 class DeleteProduct extends UseCase<void, DeleteProductParams> {
@@ -10,12 +11,12 @@ class DeleteProduct extends UseCase<void, DeleteProductParams> {
 
   @override
   Future<Either<Failure, void>> call(DeleteProductParams params) async {
-    return await repository.deleteProduct(params.id);
+    return await repository.deleteProduct(params.product);
   }
 }
 
 class DeleteProductParams {
-  final String id;
+  final Product product;
 
-  DeleteProductParams({required this.id});
+  DeleteProductParams({required this.product});
 }

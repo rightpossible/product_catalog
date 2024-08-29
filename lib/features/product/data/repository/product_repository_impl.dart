@@ -42,11 +42,17 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteProduct(String id) async {
+  Future<Either<Failure, void>> deleteProduct(Product product) async {
     try {
-      await remoteDataSource.deleteProduct(id);
-      return const Right(null);
+      final isDeleted = await remoteDataSource.deleteProduct(product.id);
+      if (isDeleted) {
+        await remoteDataSource.deleteImage(product.imageUrl);
+        return const Right(null);
+      } else {
+        return Left(Failure(message: 'Failed to delete product'));
+      }
     } catch (e) {
+      print('Error deleting product: $e'); // Debug print statement
       return Left(Failure(message: e.toString()));
     }
   }
@@ -129,7 +135,19 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
-  
+  @override
+  Future<Either<Failure, Stream<List<Product>>>> filterProducts(
+      String? category, double minPrice, double maxPrice) async {
+    try {
+      if (await connectionChecker.isConnected) {
+        final products =
+            await remoteDataSource.filterProducts(category, minPrice, maxPrice);
+        return Right(products);
+      } else {
+        return Left(Failure(message: 'No internet connection'));
+      }
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
+  }
 }
-
-

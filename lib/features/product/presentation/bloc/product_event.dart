@@ -5,15 +5,6 @@ abstract class ProductEvent {}
 //get products
 class GetAllProductsEvent extends ProductEvent {}
 
-//filter products
-class FilterProductsEvent extends ProductEvent {
-  final String category;
-  final double min;
-  final double max;
-
-  FilterProductsEvent({required this.category, required this.min, required this.max});
-}
-
 //add product
 class AddProductEvent extends ProductEvent {
   final Product product;
@@ -30,9 +21,9 @@ class UpdateProductEvent extends ProductEvent {
 
 //delete product  
 class DeleteProductEvent extends ProductEvent {
-  final String productId;
+  final Product product;
 
-  DeleteProductEvent({required this.productId});
+  DeleteProductEvent({required this.product});
 }
 
 //upload image
@@ -40,6 +31,20 @@ class UploadImageEvent extends ProductEvent {
   final String localImageUrl;
 
   UploadImageEvent({required this.localImageUrl});
+}
+
+class DeleteImageEvent extends ProductEvent {
+  final String imageUrl;
+
+  DeleteImageEvent({required this.imageUrl});
+}
+
+class ApplyFiltersEvent extends ProductEvent {
+  final String? category;
+  final double minPrice;
+  final double maxPrice;
+
+  ApplyFiltersEvent({this.category, required this.minPrice, required this.maxPrice});
 }
 
 

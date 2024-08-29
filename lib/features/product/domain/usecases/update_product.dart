@@ -5,12 +5,12 @@ import 'package:product_catalog/core/usecase/usecase.dart';
 import 'package:product_catalog/features/product/domain/entities/product.dart';
 import 'package:product_catalog/features/product/domain/repository/product_repository.dart';
 
-class UpdateProduct extends UseCase<void, UpdateProductParams> {
+class UpdateProduct extends UseCase<Product, UpdateProductParams> {
   final ProductRepository repository;
   UpdateProduct(this.repository);
 
   @override
-  Future<Either<Failure, void>> call(UpdateProductParams params) async {
+  Future<Either<Failure, Product>> call(UpdateProductParams params) async {
     return await repository.updateProduct(params.product);
   }
 }
