@@ -11,9 +11,9 @@ Future<void> initDependencies() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   final AppDatabase database = AppDatabase();
-    await databaseFactory.setDatabasesPath(await getDatabasesPath());
+  await databaseFactory.setDatabasesPath(await getDatabasesPath());
 
-   await DefaultCacheManager().emptyCache();
+  await DefaultCacheManager().emptyCache();
 
   serviceLocator.registerLazySingleton(() => database);
 
@@ -25,6 +25,8 @@ Future<void> initDependencies() async {
 
   //features
   _initProductDependencies();
+
+  /// addExampleProducts();
 }
 
 void _initProductDependencies() {

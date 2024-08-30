@@ -16,30 +16,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late PageController _pageController;
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     context.read<ProductBloc>().add(GetAllProductsEvent());
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _selectedIndex = index);
-        },
+      body: IndexedStack(
+        index: _selectedIndex,
         children: [
           _buildProductsPage(),
           const AddEditProductPage(),
@@ -66,28 +61,19 @@ class _HomePageState extends State<HomePage> {
   Widget _buildProductsPage() {
     return RefreshIndicator(
       onRefresh: () async {
-        try {
-          final completer = Completer<void>();
-          context.read<ProductBloc>().add(GetAllProductsEvent());
+        final completer = Completer<void>();
+        context.read<ProductBloc>().add(GetAllProductsEvent());
 
-          // Listen for the state change
-          final subscription =
-              context.read<ProductBloc>().stream.listen((state) {
-            if (state is GetAllProductsSuccess || state is ErrorState) {
-              if (!completer.isCompleted) completer.complete();
-            }
-          });
+        late final StreamSubscription subscription;
 
-          // Wait for the operation to complete or timeout after 10 seconds
-          await completer.future.timeout(const Duration(seconds: 10));
-          await subscription.cancel();
-        } catch (e) {
-          // Handle timeout or any other errors
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Refresh failed: $e')),
-          );
-        }
+        subscription = context.read<ProductBloc>().stream.listen((state) {
+          if (state is GetAllProductsSuccess || state is ErrorState) {
+            completer.complete();
+            subscription.cancel();
+          }
+        });
+
+        return completer.future;
       },
       child: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
@@ -95,12 +81,12 @@ class _HomePageState extends State<HomePage> {
             return ProductsPage(
               child: ProductPageWidgets(productsStream: state.products),
             );
-          } else if (state is FilteringProductsSuccess) {
-            return ProductsPage(
-              child: ProductPageWidgets(productsStream: state.products),
-            );
           } else if (state is ErrorState) {
             return Center(child: Text('Error: ${state.error}'));
+          } else if (state is GettingAllProducts) {
+            return const ProductsPage(
+              child: ProductLoadingWidget(),
+            );
           }
           return const ProductsPage(
             child: ProductLoadingWidget(),
@@ -108,16 +94,5 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    });
   }
 }

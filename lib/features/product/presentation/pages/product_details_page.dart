@@ -76,13 +76,6 @@ class ProductDetailsPage extends StatelessWidget {
               onPressed: () => _showDeleteConfirmation(context),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.home, size: 28),
-            onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const HomePage()),
-              (route) => false,
-            ),
-          ),
         ],
         elevation: 0,
         shape: const RoundedRectangleBorder(
@@ -233,7 +226,7 @@ class ProductDetailsPage extends StatelessWidget {
         const Text('(123 Ratings)'),
         const Spacer(),
         Text(
-          '\$${product.price.toStringAsFixed(2)}',
+          'NGN ${product.price.toStringAsFixed(2)}',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,

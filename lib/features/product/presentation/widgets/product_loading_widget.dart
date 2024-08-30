@@ -10,8 +10,8 @@ class ProductLoadingWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 10,
+        childAspectRatio: 0.55,
+        crossAxisSpacing: 9,
         mainAxisSpacing: 10,
       ),
       itemCount: 6, // Show 6 loading cards

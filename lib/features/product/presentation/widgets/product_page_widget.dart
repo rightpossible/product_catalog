@@ -7,6 +7,7 @@ import 'package:product_catalog/features/product/presentation/bloc/product_bloc.
 import 'package:product_catalog/features/product/presentation/pages/product_details_page.dart';
 
 import 'package:product_catalog/features/product/presentation/widgets/product_list_card.dart';
+import 'package:product_catalog/features/product/presentation/widgets/product_loading_widget.dart';
 
 class ProductPageWidgets extends StatelessWidget {
   const ProductPageWidgets({
@@ -69,7 +70,7 @@ class ProductPageWidgets extends StatelessWidget {
           state is FilteringProductsSuccess ? state.products : productsStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const ProductLoadingWidget();
         }
 
         if (snapshot.hasError) {
