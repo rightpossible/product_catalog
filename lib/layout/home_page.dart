@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:product_catalog/features/product/presentation/bloc/product_bloc.dart';
 import 'package:product_catalog/features/product/presentation/pages/products_page.dart';
-import 'package:product_catalog/features/product/presentation/pages/add_Edit_product_page.dart';
+import 'package:product_catalog/features/product/presentation/pages/add_edit_product_page.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_loading_widget.dart';
 import 'package:product_catalog/features/product/presentation/widgets/product_page_widget.dart';
 
@@ -83,6 +83,7 @@ class _HomePageState extends State<HomePage> {
           await subscription.cancel();
         } catch (e) {
           // Handle timeout or any other errors
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Refresh failed: $e')),
           );

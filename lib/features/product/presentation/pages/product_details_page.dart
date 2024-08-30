@@ -256,21 +256,21 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAddToCartButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Implement add to cart functionality
-        },
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: const Text('Add to Cart', style: TextStyle(fontSize: 18)),
-      ),
-    );
-  }
+  // Widget _buildAddToCartButton(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: ElevatedButton(
+  //       onPressed: () {
+  //         // TODO: Implement add to cart functionality
+  //       },
+  //       style: ElevatedButton.styleFrom(
+  //         minimumSize: const Size(double.infinity, 50),
+  //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //       ),
+  //       child: const Text('Add to Cart', style: TextStyle(fontSize: 18)),
+  //     ),
+  //   );
+  // }
 
   void _navigateToEditProduct(BuildContext context) {
     Navigator.of(context).push(
