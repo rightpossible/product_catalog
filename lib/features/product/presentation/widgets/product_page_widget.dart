@@ -10,28 +10,58 @@ import 'package:product_catalog/features/product/presentation/widgets/product_li
 import 'package:product_catalog/features/product/presentation/widgets/product_loading_widget.dart';
 
 class ProductPageWidgets extends StatelessWidget {
+  final ProductState state;
+
   const ProductPageWidgets({
     super.key,
-    required this.productsStream,
+    required this.state,
   });
-
-  final Stream<List<Product>> productsStream;
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ProductBloc, ProductState>(
-      listener: _handleErrorState,
-      builder: (context, state) {
-        return Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: _buildProductList(context, state),
-            ),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        _buildHeader(context),
+        Expanded(
+          child: _buildProductList(context, state),
+        ),
+      ],
     );
+  }
+
+  Widget _buildProductList(BuildContext context, ProductState state) {
+    if (state is GettingAllProducts || state is FilteringProducts) {
+      return const ProductLoadingWidget();
+    }
+
+    if (state is GetAllProductsSuccess || state is FilteringProductsSuccess) {
+      final productsStream = state is GetAllProductsSuccess
+          ? state.products
+          : (state as FilteringProductsSuccess).products;
+
+      return StreamBuilder<List<Product>>(
+        stream: productsStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const ProductLoadingWidget();
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final products = snapshot.data ?? [];
+
+          if (products.isEmpty) {
+            return _buildEmptyProductList(context);
+          }
+
+          return _buildProductGrid(products);
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   void _handleErrorState(BuildContext context, ProductState state) {
@@ -61,54 +91,6 @@ class ProductPageWidgets extends StatelessWidget {
       onPressed: () => _showFilterBottomSheet(context),
       icon: const Icon(Icons.filter_list),
       label: Text('Filter', style: Theme.of(context).textTheme.titleMedium),
-    );
-  }
-
-  Widget _buildProductList(BuildContext context, ProductState state) {
-    return StreamBuilder<List<Product>>(
-      stream:
-          state is FilteringProductsSuccess ? state.products : productsStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const ProductLoadingWidget();
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        final products = snapshot.data ?? [];
-
-        if (products.isEmpty) {
-          return _buildEmptyProductList(context);
-        }
-
-        return _buildProductGrid(products);
-      },
-    );
-  }
-
-  void _showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return AnimatedPadding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: FilterBottomSheet(
-            onApplyFilters: (category, priceRange) {
-              context.read<ProductBloc>().add(ApplyFiltersEvent(
-                    category: category?.toString().split('.').last,
-                    minPrice: priceRange.start,
-                    maxPrice: priceRange.end,
-                  ));
-            },
-          ),
-        );
-      },
     );
   }
 
@@ -196,6 +178,30 @@ class ProductPageWidgets extends StatelessWidget {
           offset: const Offset(0, 5),
         ),
       ],
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return AnimatedPadding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: FilterBottomSheet(
+            onApplyFilters: (category, priceRange) {
+              context.read<ProductBloc>().add(ApplyFiltersEvent(
+                    category: category?.toString().split('.').last,
+                    minPrice: priceRange.start,
+                    maxPrice: priceRange.end,
+                  ));
+            },
+          ),
+        );
+      },
     );
   }
 }

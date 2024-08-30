@@ -309,29 +309,40 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     // Apply category filter if provided
     if (category != null && category.isNotEmpty) {
       query = query.where('category', isEqualTo: category);
+      print('Applied category filter: $category');
     }
 
     // Apply price range filter
     query = query
         .where('price', isGreaterThanOrEqualTo: minPrice)
         .where('price', isLessThanOrEqualTo: maxPrice);
+    print('Applied price range filter: \$$minPrice - \$$maxPrice');
 
     return query.snapshots().map((querySnapshot) {
+      print('Received snapshot with ${querySnapshot.docs.length} documents');
       final filteredProducts = querySnapshot.docs
-          .map((doc) =>
-              ProductModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) {
+            try {
+              return ProductModel.fromJson(doc.data() as Map<String, dynamic>);
+            } catch (e) {
+              print('Error parsing document ${doc.id}: $e');
+              return null;
+            }
+          })
+          .where((product) => product != null)
+          .cast<ProductModel>()
           .toList();
 
       print('Filtered products count: ${filteredProducts.length}');
       return filteredProducts;
     }).handleError((e) {
-      print('Error filtering products: $e');
+      print('Error in filterProducts stream: $e');
       if (e is FirebaseException) {
         print('Firebase error code: ${e.code}');
         print('Firebase error message: ${e.message}');
       }
-
-      throw ServerException(e.toString());
+      // Instead of throwing an exception, return an empty list
+      return <ProductModel>[];
     });
   }
 }

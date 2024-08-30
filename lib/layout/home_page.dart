@@ -61,35 +61,15 @@ class _HomePageState extends State<HomePage> {
   Widget _buildProductsPage() {
     return RefreshIndicator(
       onRefresh: () async {
-        final completer = Completer<void>();
         context.read<ProductBloc>().add(GetAllProductsEvent());
-
-        late final StreamSubscription subscription;
-
-        subscription = context.read<ProductBloc>().stream.listen((state) {
-          if (state is GetAllProductsSuccess || state is ErrorState) {
-            completer.complete();
-            subscription.cancel();
-          }
-        });
-
-        return completer.future;
       },
       child: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
-          if (state is GetAllProductsSuccess) {
-            return ProductsPage(
-              child: ProductPageWidgets(productsStream: state.products),
-            );
-          } else if (state is ErrorState) {
+          if (state is ErrorState) {
             return Center(child: Text('Error: ${state.error}'));
-          } else if (state is GettingAllProducts) {
-            return const ProductsPage(
-              child: ProductLoadingWidget(),
-            );
           }
-          return const ProductsPage(
-            child: ProductLoadingWidget(),
+          return ProductsPage(
+            child: ProductPageWidgets(state: state),
           );
         },
       ),
